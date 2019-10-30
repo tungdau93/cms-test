@@ -1,0 +1,119 @@
+.ant-layout {
+  /* min-height: 100vh !important; */
+}
+
+.ant-layout .ant-layout-sider {
+  height: 100vh;
+  top: 0px;
+  transition: all 0.4s;
+}
+
+.ant-layout .ant-layout-sider-collapsed .logo {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  background-image: url('../images/computer.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  margin: 16px;
+}
+
+.ant-layout-sider-children {
+  background-color: #f0f2f5;
+  box-shadow: 0px 3px 3px -2px rgba(0, 0, 0, 0.2), 0px 3px 4px 0px rgba(0, 0, 0, 0.14), 0px 1px 8px 0px rgba(0, 0, 0, 0.12) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ant-layout-sider-children .ant-menu {
+  height: calc(100vh - (16+100+16+15+32));
+}
+
+.ant-layout-sider-children .ant-menu-dark {
+  background-color: #f0f2f5 !important;
+  margin-top: 15px;
+}
+
+.ant-layout-sider-children .ant-menu-inline span {
+  color: #435b71;
+  line-height: 1.6;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.ant-layout-header {
+  padding: 0 !important;
+  background: #f0f2f5 !important;
+  display: flex;
+  color: #435b71;
+  align-items: center;
+}
+
+.ant-layout-header .anticon-menu {
+  font-size: 30px;
+  color: #435b71;
+}
+
+.ant-layout-header .title-header {
+  color: #435b71 !important;
+  margin-top: 7px;
+}
+
+.ant-menu-item-selected {
+  background-color: #b3d4fc !important;
+}
+
+.ant-layout-sider-children button {
+  width: 90%;
+}
+
+.ant-layout-sider-collapsed button {
+  display: flex;
+  justify-content: center;
+}
+
+.ant-layout .ant-layout-content {
+  margin-left: 25px;
+  margin-right: 25px;
+}
+
+.ant-typography {
+  color: #435b71 !important;
+}
+
+.ant-row .title-wrapper {
+  padding-top: 10px;
+}
+
+.ant-row .button-wrapper {
+  display: flex !important;
+  justify-content: space-evenly !important;
+}
+
+.ant-row .ant-col {
+  height: 55px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-col h2, .ant-col input, .ant-col .ant-btn {
+  height: 36px;
+}
+
+.button-wrapper .ant-btn {
+  width: 80px;
+}
+
+.ant-layout .ant-table-wrapper {
+  margin-top: 30px;
+}
+
+.sideBar-container {
+  height: 90vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
