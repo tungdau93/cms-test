@@ -1,22 +1,22 @@
 import { createStore, applyMiddleware } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import rootReducer from './root-reducer'
+import rootSaga from '../saga/'
 
 function configureStore(preloadedState) {
   // Create middleware
-  // const sagaMiddleware = createSagaMiddleware()
+  const sagaMiddleware = createSagaMiddleware()
 
   // Create Store
   const store = createStore(
-      rootReducer,
-      preloadedState,
-      // applyMiddleware(sagaMiddleware)
+    rootReducer,
+    preloadedState,
+    applyMiddleware(sagaMiddleware)
   )
   // Run middleware
-  // store.sagaTask = sagaMiddleware.run(rootSaga)
+  store.sagaTask = sagaMiddleware.run(rootSaga)
 
   return store
 }
 
 export default configureStore
-

@@ -3,9 +3,10 @@ import { createReducer, createActions } from "reduxsauce"
 // TODO:Declare Action and type
 const {Types, Creators} = createActions({
   getClickSideBar: [],
+  logOut: [],
 })
 
-export const PostTypes = Types
+export const SideBarTypes = Types
 export default Creators
 
 //TODO: Declare initial state
@@ -21,5 +22,5 @@ export const clickSideBar = (state) => ({
 
 //TODO:Hookup Reducers To Types in Action
 export const reducer = createReducer(INITIAL_STATE, {
-  [PostTypes.GET_CLICK_SIDE_BAR]: clickSideBar,
+  [SideBarTypes.GET_CLICK_SIDE_BAR]: clickSideBar,
 })

@@ -1,5 +1,9 @@
 @import './pages/css/search-input.css';
-@import './pages/css/list-test.css';
+@import './pages/css/list.css';
+@import './pages/css/add.css';
+@import './pages/css/add-question.css';
+@import './pages/css/login.css';
+@import './pages/css/not-found.css';
 
 .App {
   text-align: center;
@@ -44,4 +48,26 @@
   background-repeat: no-repeat;
   background-size: cover;
   margin: 16px;
+}
+
+.loading {
+  margin: 0 auto;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+}
+
+.loadingOverlay {
+  opacity: .80;
+  filter: alpha(opacity=80);
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  background-color: #f7f7f7;
+  display: block;
+  right: 0;
+  bottom: 0;
 }

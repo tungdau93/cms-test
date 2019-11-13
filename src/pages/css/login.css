@@ -1,0 +1,49 @@
+.login {
+  background-image: url("../images/background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeate;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding-top: 50px;
+}
+
+.form-validate {
+  margin: 0 auto;
+  width: 400px;
+  height: 300px;
+}
+
+.logo-login {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo-login img {
+  width: 250px;
+  height: auto;
+}
+
+.title {
+  font-weight: bold;
+  font-size: 16px;
+}
+.invalid-feedback {
+  font-size: 14px;
+}
+
+.error-user-pass {
+  color: red;
+}
+
+.ant-message-notice .ant-message-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ant-message-notice .ant-message-error span {
+  margin-top: 4px;
+}
+

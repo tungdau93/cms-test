@@ -27,7 +27,7 @@ class HeaderComp extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  collapsed: state.collapsed.collapsed
+  collapsed: state.sideBar.collapsed
 })
 
 const mapDispatchToProps = (dispatch) => ({

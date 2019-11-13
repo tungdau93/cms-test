@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import './App.css'
-import PageLayout from "./layout/PageLayout"
+import Route from './router/route'
 import { Provider } from "react-redux"
 import configureStore from "./redux/index"
 
@@ -8,7 +8,7 @@ class App extends Component {
   render() {
     return (
       <Provider store={configureStore()}>
-        <PageLayout />
+        <Route />
       </Provider>
     );
   }

@@ -1,7 +1,3 @@
-.ant-layout {
-  /* min-height: 100vh !important; */
-}
-
 .ant-layout .ant-layout-sider {
   height: 100vh;
   top: 0px;
@@ -86,12 +82,16 @@
   padding-top: 10px;
 }
 
-.ant-row .button-wrapper {
-  display: flex !important;
-  justify-content: space-evenly !important;
+.ant-row .button-test-wrapper {
+ display: flex !important;
+ justify-content: flex-end;
 }
 
-.ant-row .ant-col {
+.ant-row .button-wrapper .ant-btn-danger {
+  margin-left: 20px;
+}
+
+.ant-row .title-wrapper {
   height: 55px;
   display: flex;
   justify-content: center;
@@ -116,4 +116,34 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.ant-menu-item span {
+  margin-left: 15px;
+}
+
+.sideBar-container .ant-menu-inline-collapsed {
+  margin-top: 61px;
+}
+
+.ant-menu-inline-collapsed span {
+  display: none;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item img {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ant-table-header-column .ant-table-column-title {
+  font-weight: 600;
 }

@@ -1,0 +1,106 @@
+.ant-layout .header-wrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-left: 65px;
+}
+
+.ant-layout .header-wrapper .title-wrapper {
+  padding-top: 0px !important;
+}
+
+.ant-layout .form-wrapper {
+  display: flex;
+  /* justify-content: center; */
+  margin-top: 20px;
+}
+
+.ant-layout .form-wrapper .addTest-horizontal {
+  display: flex;
+  justify-content: center;
+  /* flex-direction: column; */
+  width: 100%;
+}
+
+.addTest-horizontal .ant-form-item .ant-col-6 {
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 20px;
+}
+
+.ant-upload .ant-upload .ant-btn {
+  display: flex;
+  align-items: center;
+}
+
+.ant-form-item-control .ant-form-item-children .ant-btn-primary {
+  margin-right: 30px;
+}
+
+.previewComponent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.previewComponent .imgPreview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.previewComponent .imgPreview img {
+  max-width: 250px;
+  max-height: 250px;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.ant-col-14 .ant-form-button {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 55px;
+}
+
+.ant-col-14 .ant-form-button .ant-form-item-control {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.has-error .ant-form-explain {
+  margin-top: 2px;
+}
+
+.ant-form-horizontal .ant-col-10 {
+  display: flex;
+  justify-content: center;
+}
+
+.ant-form-horizontal .ant-col-10 .form-upload-image {
+  display: flex;
+  justify-content: center;
+}
+
+.ant-upload-select-picture {
+  cursor: pointer;
+}
+
+.ant-upload-select-picture .show-upload-imageUrl {
+  width: 100px;
+  height: 100px;
+  background-color: #DFDFDF;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#image .avatar-uploader {
+  position: relative;
+}
+
+#image .anticon-close-circle {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+}
