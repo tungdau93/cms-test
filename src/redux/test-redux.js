@@ -4,6 +4,8 @@ import { createReducer, createActions } from "reduxsauce"
 const { Types, Creators } = createActions({
   testGetRequest: ['token'],
   testGetSucceed: ['data'],
+  testDetailRequest: ['id'],
+  testDetailSucceed: ['data'],
   testAddRequest: ['content'],
   testAddSucceed: [],
   testEditRequest: ['content'],
@@ -20,6 +22,7 @@ export default Creators
 //TODO: Declare initial state
 export const INITIAL_STATE = {
   listTest: [],
+  detailTest: {},
   errorCode: '',
   processing: false,
   notifyMessage: '',
@@ -36,6 +39,14 @@ export const getsucceed = (state, { data }) => {
   return {
     ...state,
     listTest: data,
+    processing: false
+  }
+}
+
+export const detailSucceed = (state, { data }) => {
+  return {
+    ...state,
+    detailTest: data,
     processing: false
   }
 }
@@ -76,7 +87,6 @@ export const failed = (state, { error }) => {
     ...state,
     errorCode: error,
     processing: false,
-    notifyMessage: 'An error occurred. Please try again!'
   }
 }
 
@@ -84,6 +94,8 @@ export const failed = (state, { error }) => {
 export const reducer = createReducer(INITIAL_STATE, {
   [TestTypes.TEST_GET_REQUEST]: request,
   [TestTypes.TEST_GET_SUCCEED]: getsucceed,
+  [TestTypes.TEST_DETAIL_REQUEST]: request,
+  [TestTypes.TEST_DETAIL_SUCCEED]: detailSucceed,
   [TestTypes.TEST_ADD_REQUEST]: request,
   [TestTypes.TEST_ADD_SUCCEED]: addSucceed,
   [TestTypes.TEST_EDIT_REQUEST]: request,

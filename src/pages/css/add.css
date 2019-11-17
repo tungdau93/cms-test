@@ -104,3 +104,10 @@
   left: 5px;
   top: 5px;
 }
+
+#image .avatar-uploader img {
+  width: auto;
+  height: auto;
+  max-width: 400px;
+  max-height: 250px;
+}

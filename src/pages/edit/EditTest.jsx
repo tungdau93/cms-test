@@ -8,24 +8,46 @@ import TestTypes from '../../redux/test-redux'
 const { Title } = Typography
 const { Option } = Select
 const quantityRegex = /^[1-9][0-9]?$|^100$/
-const timeRegex = /^[1-9][0-9]*$/
+const timeRegex = /0*[1-9][0-9]*$/
 
 class EditTest extends Component {
   state = {
     name: '',
-    type: '',
-    quantity: '',
+    category: '',
+    quantity_question: '',
     time: '',
     file: undefined,
     loading: false,
-    token: ''
+    imageUrl: '',
+    image: '',
+    image_old: ''
   }
 
   componentDidMount() {
-    const token = window.localStorage.getItem('token')
-    this.setState({
-      token: token
-    })
+    const pathName = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1]
+    this.props.getDetailData(pathName)
+  }
+
+  componentDidUpdate(nextProps) {
+    if (this.props.detailTest && nextProps.detailTest !== this.props.detailTest) {
+      this.setState({
+        imageUrl: `http://27.72.88.246:8228${this.props.detailTest.image}`,
+        image: this.props.detailTest.image,
+        image_old: this.props.detailTest.image,
+        name: this.props.detailTest.name,
+        quantity_question: this.props.detailTest.quantity_question,
+        time: this.props.detailTest.time,
+        category: this.props.detailTest.category
+      })
+    }
+
+    if (this.props.notifyMessage === 'Edit test successfully!') {
+      message.success(this.props.notifyMessage, 1)
+      nextProps.updateNotifyMessage()
+      setTimeout(() => {
+        this.props.history.push('/test')
+      }, 1000)
+    }
   }
 
   handleInputChange = (key, event) => {
@@ -40,25 +62,6 @@ class EditTest extends Component {
     })
   }
 
-  handleSubmit = (event) => {
-    event.preventDefault()
-    this.props.form.validateFieldsAndScroll((error, values) => {
-      // image là url từ phía backend trả về từ response
-      values.image = this.state.imageUrl
-      if (!error) {
-        // submit form (call api)
-        // console.log('Received error of form: ', error)
-        console.log('Received values of form: ', values)
-        this.props.editData({
-          id: window.location.pathname.split('/')[window.location.pathname.split('/').length - 1],
-          token: this.state.token,
-          data: values
-        })
-        message.success('Create test successfully!', 1)
-      }
-    })
-  }
-
   getBase64 = (img, callback) => {
     const reader = new FileReader()
     reader.addEventListener('load', () => callback(reader.result))
@@ -70,7 +73,7 @@ class EditTest extends Component {
     if (!isJpgOrPng) {
       message.error('You can only upload JPG/PNG file!')
     }
-    const isLt2M = file.size / 1024 / 1024 < 2.5
+    const isLt2M = file.size / 1024 / 1024 < 2
     if (!isLt2M) {
       message.error('Image must smaller than 2MB!')
     }
@@ -85,15 +88,33 @@ class EditTest extends Component {
       return
     }
     if (info.file.status === 'done') {
-      // Get this url from response in real world.
+      // Get this url from response.
       this.getBase64(info.file.originFileObj, imageUrl => {
+        console.log(info.file.response.data.url)
         this.setState({
           file: info.file,
-          imageUrl,
+          imageUrl: imageUrl,
+          image: info.file.response.data.url,
           loading: false,
         })
       })
     }
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault()
+    this.props.form.validateFieldsAndScroll((error, values) => {
+      values.quantity_question = Number(this.state.quantity_question)
+      values.time = Number(this.state.time)
+      values.image = this.state.image
+      values.image_old = this.props.detailTest.image
+      if (!error) {
+        this.props.editData({
+          id: window.location.pathname.split('/')[window.location.pathname.split('/').length - 1],
+          data: values
+        })
+      }
+    })
   }
 
   render() {
@@ -102,8 +123,7 @@ class EditTest extends Component {
       labelCol: { span: 6 },
       wrapperCol: { span: 14 }
     }
-
-    const { imageUrl } = this.state
+    // const { imageUrl } = this.state
     return (
       <LayoutComponent>
         <Layout>
@@ -132,39 +152,39 @@ class EditTest extends Component {
                         }
                       ]
                     })(
-                      <Input placeholder='Name of the test' allowClear onChange={(event) => { this.handleInputChange('name', event) }} />
+                      <Input placeholder='Name of the test' onChange={(event) => { this.handleInputChange('name', event) }} />
                     )
                   }
                 </Form.Item>
-                <Form.Item label="Type" hasFeedback>
+                <Form.Item label="Category" hasFeedback>
                   {
-                    getFieldDecorator("type", {
-                      initialValue: this.state.type,
+                    getFieldDecorator("category", {
+                      initialValue: this.state.category,
                       rules: [
-                        { required: true, message: "Please select type of the test" },
+                        { required: true, message: "Please select category of the test" },
                       ]
                     })(
-                      <Select placeholder="Please select a type of the test" onChange={this.handleTypeChange}>
-                        <Option value="1">ReactJS</Option>
-                        <Option value="2">PHP</Option>
-                        <Option value="3">Python</Option>
-                        <Option value="4">Golang</Option>
-                        <Option value="5">MySQL</Option>
-                        <Option value="6">HTML&CSS</Option>
+                      <Select placeholder="Please select a category of the test" onChange={this.handleCategoryChange}>
+                        <Option value={1}>ReactJS</Option>
+                        <Option value={2}>PHP</Option>
+                        <Option value={3}>Python</Option>
+                        <Option value={4}>Golang</Option>
+                        <Option value={5}>MySQL</Option>
+                        <Option value={6}>HTML&CSS</Option>
                       </Select>
                     )
                   }
                 </Form.Item>
                 <Form.Item label="Quantity">
                   {
-                    getFieldDecorator("quantity", {
-                      initialValue: this.state.quantity,
+                    getFieldDecorator("quantity_question", {
+                      initialValue: this.state.quantity_question,
                       rules: [
                         { required: true, message: "Please input number of question in the test" },
                         { pattern: quantityRegex, message: 'Must be positive number in the range 0 -> 100' },
                       ]
                     })(
-                      <Input placeholder='The number of questions in the test' allowClear onChange={(event) => { this.handleInputChange('quantity', event) }} />
+                      <Input placeholder='The number of questions in the test' onChange={(event) => { this.handleInputChange('quantity_question', event) }} />
                     )
                   }
                 </Form.Item>
@@ -177,7 +197,7 @@ class EditTest extends Component {
                         { pattern: timeRegex, message: 'Time must be positive number' }
                       ]
                     })(
-                      <Input placeholder='Time of the test' allowClear onChange={(event) => { this.handleInputChange('time', event) }} />
+                      <Input placeholder='Time of the test' onChange={(event) => { this.handleInputChange('time', event) }} />
                     )
                   }
                 </Form.Item>
@@ -194,10 +214,7 @@ class EditTest extends Component {
                 <Form.Item className='form-upload-image'>
                   {
                     getFieldDecorator('image', {
-                      initialValue: this.state.file,
-                      // rules: [
-                      //   { required: true, message: "Please input file" },
-                      // ]
+                      initialValue: this.state.image_old,
                     })(
                       <div>
                         <Upload
@@ -205,12 +222,15 @@ class EditTest extends Component {
                           listType="picture"
                           className="avatar-uploader"
                           showUploadList={false}
-                          action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                          action="http://27.72.88.246:8228/api/upload/"
+                          headers={
+                            { "Authorization": `Bearer ${window.localStorage.getItem('token')}` }
+                          }
                           beforeUpload={this.beforeUpload}
                           onChange={this.handleImageChange}
                         >
                           {
-                            imageUrl ? <img src={imageUrl} alt="image" style={{ width: '100%' }} /> : (
+                            this.state.imageUrl ? <img src={this.state.imageUrl} alt="image" /> : (
                               <div className='show-upload-imageUrl'>
                                 <Icon type={this.state.loading ? 'loading' : 'plus'} />
                                 <div className="ant-upload-text">Upload</div>
@@ -219,7 +239,7 @@ class EditTest extends Component {
                           }
                         </Upload>
                         {
-                          imageUrl ? (
+                          this.state.imageUrl ? (
                             <Icon
                               type="close-circle"
                               theme='twoTone'
@@ -230,7 +250,8 @@ class EditTest extends Component {
                               onClick={
                                 () => {
                                   this.setState({
-                                    imageUrl: ''
+                                    imageUrl: '',
+                                    image: ''
                                   })
                                 }
                               }
@@ -244,21 +265,21 @@ class EditTest extends Component {
               </Col>
             </Form>
           </Row>
-          {
-            this.state.processing ? (
-              <div>
-                <ReactLoading
-                  type={'spin'}
-                  color={'#f8bf63'}
-                  height={'65px'}
-                  width={'65px'}
-                  className="loading"
-                />
-                <div className="loadingOverlay" />
-              </div>
-            ) : null
-          }
         </Layout>
+        {
+          this.props.processing ? (
+            <div>
+              <ReactLoading
+                type={'spin'}
+                color={'#f8bf63'}
+                height={'65px'}
+                width={'65px'}
+                className="loading"
+              />
+              <div className="loadingOverlay" />
+            </div>
+          ) : null
+        }
       </LayoutComponent>
     )
   }
@@ -266,6 +287,7 @@ class EditTest extends Component {
 
 const mapStateToProps = (state) => {
   return {
+    detailTest: state.tests.detailTest,
     processing: state.tests.processing,
     notifyMessage: state.tests.notifyMessage
   }
@@ -273,8 +295,16 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    getDetailData: (id) => {
+      dispatch(TestTypes.testDetailRequest(id))
+    },
+
     editData: (content) => {
       dispatch(TestTypes.testEditRequest(content))
+    },
+
+    updateNotifyMessage: () => {
+      dispatch(TestTypes.testNotifyMessage())
     }
   }
 }

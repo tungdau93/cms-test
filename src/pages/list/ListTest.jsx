@@ -1,34 +1,31 @@
 import React, { Component } from 'react'
-import { Layout, Typography, Table, Button, Row, Col, Divider, Popconfirm, Icon } from "antd"
+import { Layout, Typography, Table, Button, Row, Col, Divider, Popconfirm, Icon, message } from "antd"
 import SearchInput, { createFilter } from 'react-search-input'
 import LayoutComponent from '../../layout/LayoutComponent'
 import TestTypes from '../../redux/test-redux'
 import { connect } from 'react-redux'
+import ReactLoading from 'react-loading'
 
 const { Title } = Typography
 const KEYS_TO_FILTERS = ['name', 'type', 'quantity', 'time']
-
-const data = []
-const quantity = [10, 15, 20, 30, 40, 50, 60]
-const time = [10, 15, 20, 30, 45, 60, 90, 120]
 const type = ['ReactJS', 'PHP', 'Python', 'Golang', 'MySQL', 'HTML&CSS']
-for (let i = 1; i < 46; i++) {
-  data.push({
-    key: i,
-    name: `Test das jdhasdjkash djkahsdkjashdkjsahdkasdsadhasd sadhadhasjkd jkdajkdashjkdsajkhdasjkdask dashjkdsjkadsjkadhkasdhjks ${i}`,
-    type: type[Math.floor(Math.random() * type.length)],
-    quantity: quantity[Math.floor(Math.random() * quantity.length)],
-    time: time[Math.floor(Math.random() * time.length)],
-    createdAt: `${new Date().getDate()}/${new Date().getMonth()}/${new Date().getFullYear()}`,
-    modifiedAt: `${new Date().getDate()}/${new Date().getMonth()}/${new Date().getFullYear()}`
-  })
-}
 
 class ListTest extends Component {
   state = {
     selectedRowKeys: [], // Check here to configure the default column
     inputSearch: '',
-    token: ''
+  }
+
+  componentDidMount() {
+    this.props.getData()
+  }
+
+  componentDidUpdate(nextProps) {
+    if (this.props.notifyMessage === 'Delete test successfully!') {
+      message.success(this.props.notifyMessage, 1)
+      nextProps.updateNotifyMessage()
+      nextProps.getData()
+    }
   }
 
   handleInputChange = (value) => {
@@ -43,9 +40,8 @@ class ListTest extends Component {
     })
   }
 
-  componentDidMount() {
-    // get token from localStorage
-    this.props.getData()
+  handleClickDetail = (id) => {
+    this.props.history.push(`test/edit/${id}`)
   }
 
   render() {
@@ -86,9 +82,9 @@ class ListTest extends Component {
         ellipsis: true
       },
       {
-        title: 'ModifiedAt',
-        dataIndex: 'modifiedAt',
-        key: 'modifiedAt',
+        title: 'Creator',
+        dataIndex: 'creator',
+        key: 'creator',
         align: 'center',
         ellipsis: true
       },
@@ -98,7 +94,10 @@ class ListTest extends Component {
         align: 'center',
         render: (text, record) => (
           <span>
-            <a onClick={() => { this.props.history.push(`test/edit/${record.key}`) }}><Icon type="edit" theme='twoTone' style={{ fontSize: '26px' }} /></a>
+            <a onClick={() => {
+              this.handleClickDetail(record.key)
+            }}
+            ><Icon type="edit" theme='twoTone' style={{ fontSize: '26px' }} /></a>
             <Divider type="vpoststical" />
             <Popconfirm
               title="Are you sure delete this test?"
@@ -107,8 +106,10 @@ class ListTest extends Component {
               onConfirm={
                 () => {
                   this.props.deleteData({
-                    token: this.state.token,
-                    id: [record.key]
+                    set_id: [record.key]
+                  })
+                  this.setState({
+                    selectedRowKeys: []
                   })
                 }
               }
@@ -119,7 +120,28 @@ class ListTest extends Component {
         )
       }
     ]
-    const filtered = data.filter(createFilter(this.state.inputSearch, KEYS_TO_FILTERS))
+
+    const listData = []
+    const listTest = Object.values(this.props.listTest)
+
+    listTest.map((item) => {
+      const createdAt = (item.create_date).split('-')
+      const date = createdAt[2].slice(0, 2) + '/' + createdAt[1] + '/' + createdAt[0]
+      listData.push({
+        key: item.id,
+        name: item.name,
+        type: type[item.category - 1],
+        quantity: item.quantity_question,
+        time: item.time,
+        createdAt: date,
+        creator: item.creator
+      })
+    })
+
+    let filtered = ''
+    if (this.props.listTest) {
+      filtered = listData.filter(createFilter(this.state.inputSearch, KEYS_TO_FILTERS))
+    }
     const { selectedRowKeys } = this.state
     const rowSelection = {
       selectedRowKeys,
@@ -179,8 +201,10 @@ class ListTest extends Component {
                     onConfirm={
                       () => {
                         this.props.deleteData({
-                          token: this.state.token,
-                          id: this.state.selectedRowKeys
+                          set_id: this.state.selectedRowKeys
+                        })
+                        this.setState({
+                          selectedRowKeys: []
                         })
                       }
                     }
@@ -203,6 +227,20 @@ class ListTest extends Component {
             style={{ whiteSpace: 'unset' }}
           ></Table>
         </Layout>
+        {
+          this.props.processing ? (
+            <div>
+              <ReactLoading
+                type={'spin'}
+                color={'#f8bf63'}
+                height={'65px'}
+                width={'65px'}
+                className="loading"
+              />
+              <div className="loadingOverlay" />
+            </div>
+          ) : null
+        }
       </LayoutComponent>
     )
   }
@@ -210,7 +248,8 @@ class ListTest extends Component {
 
 const mapStateToProps = (state) => {
   return {
-    listTest: state.tests.listest,
+    listTest: state.tests.listTest,
+    notifyMessage: state.tests.notifyMessage,
     processing: state.tests.processing
   }
 }
@@ -220,8 +259,13 @@ const mapDispatchToProps = (dispatch) => {
     getData: () => {
       dispatch(TestTypes.testGetRequest())
     },
+
     deleteData: (content) => {
       dispatch(TestTypes.testDeleteRequest(content))
+    },
+
+    updateNotifyMessage: () => {
+      dispatch(TestTypes.testNotifyMessage())
     }
   }
 }

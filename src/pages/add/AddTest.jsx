@@ -8,7 +8,7 @@ import TestTypes from '../../redux/test-redux'
 const { Title } = Typography
 const { Option } = Select
 const quantityRegex = /^[1-9][0-9]?$|^100$/
-const timeRegex = /^[1-9][0-9]*$/
+const timeRegex = /0*[1-9][0-9]*$/
 
 class AddTest extends Component {
   state = {
@@ -18,15 +18,18 @@ class AddTest extends Component {
     time: '',
     file: undefined,
     loading: false,
-    token: '',
-    imageUrl: ''
+    imageUrl: '',
+    image: ''
   }
 
-  componentDidMount() {
-    const token = window.localStorage.getItem('token')
-    this.setState({
-      token: token
-    })
+  componentDidUpdate(nextProps) {
+    if (this.props.notifyMessage === 'Add new test successfully!') {
+      message.success(this.props.notifyMessage, 1)
+      nextProps.updateNotifyMessage()
+      setTimeout(() => {
+        this.props.history.push('/test')
+      }, 1000)
+    }
   }
 
   handleInputChange = (key, event) => {
@@ -39,34 +42,6 @@ class AddTest extends Component {
     this.setState({
       type: value
     })
-  }
-
-  handleSubmit = (event) => {
-    event.preventDefault()
-    this.props.form.validateFieldsAndScroll((error, values) => {
-      // image là url từ phía backend trả về từ response
-      values.image = this.state.imageUrl
-      values.quantity_question = Number(this.state.quantity_question)
-      values.time = Number(this.state.time)
-      if (!error) {
-        console.log('Received values of form: ', values)
-        this.props.addData({
-          token: window.localStorage.getItem('token'),
-          data: values
-        })
-      }
-    })
-  }
-
-  componentDidUpdate() {
-    // console.log(this.props.notifyMessage)
-    if (this.props.notifyMessage) {
-      message.success(this.props.notifyMessage, 1)
-      this.props.updateNotifyMessage()
-      setTimeout(() => {
-        this.props.history.push('/test')
-      }, 2000)
-    }
   }
 
   getBase64 = (img, callback) => {
@@ -95,15 +70,32 @@ class AddTest extends Component {
       return
     }
     if (info.file.status === 'done') {
-      // Get this url from response in real world.
+      // Get this url from response.
       this.getBase64(info.file.originFileObj, imageUrl => {
+        console.log(info.file.response.data.url)
         this.setState({
           file: info.file,
-          imageUrl,
+          imageUrl: imageUrl,
+          image: info.file.response.data.url,
           loading: false,
         })
       })
     }
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault()
+    this.props.form.validateFieldsAndScroll((error, values) => {
+      values.quantity_question = Number(this.state.quantity_question)
+      values.time = Number(this.state.time)
+      values.image = this.state.image
+      console.log(values)
+      if (!error) {
+        this.props.addData({
+          data: values
+        })
+      }
+    })
   }
 
   render() {
@@ -204,7 +196,7 @@ class AddTest extends Component {
                 <Form.Item className='form-upload-image'>
                   {
                     getFieldDecorator('image', {
-                      initialValue: this.state.file,
+                      initialValue: this.state.imageUrl,
                       // rules: [
                       //   { required: true, message: "Please input file" },
                       // ]
@@ -215,18 +207,22 @@ class AddTest extends Component {
                           listType="picture"
                           className="avatar-uploader"
                           showUploadList={false}
-                          action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                          action="http://27.72.88.246:8228/api/upload/"
+                          headers={
+                            { "Authorization": `Bearer ${window.localStorage.getItem('token')}` }
+                          }
                           beforeUpload={this.beforeUpload}
                           onChange={this.handleImageChange}
-                          defaultFileList={this.state.file}
                         >
                           {
-                            imageUrl ? <img src={imageUrl} alt="image" style={{ width: '100%' }} /> : (
-                              <div className='show-upload-imageUrl'>
-                                <Icon type={this.state.loading ? 'loading' : 'plus'} />
-                                <div className="ant-upload-text">Upload</div>
-                              </div>
-                            )
+                            imageUrl ? (
+                              <img src={imageUrl} alt="image" style={{ width: '100%' }} />
+                            ) : (
+                                <div className='show-upload-imageUrl'>
+                                  <Icon type={this.state.loading ? 'loading' : 'plus'} />
+                                  <div className="ant-upload-text">Upload</div>
+                                </div>
+                              )
                           }
                         </Upload>
                         {
@@ -256,7 +252,7 @@ class AddTest extends Component {
             </Form>
           </Row>
           {
-            this.state.processing ? (
+            this.props.processing ? (
               <div>
                 <ReactLoading
                   type={'spin'}

@@ -4,6 +4,7 @@ import { withRouter } from 'react-router'
 import { connect } from 'react-redux'
 import { Redirect } from 'react-router-dom'
 import LoginTypes from '../../redux/login-redux'
+import ReactLoading from 'react-loading'
 
 class Login extends Component {
   state = {
@@ -24,18 +25,20 @@ class Login extends Component {
       nextProps.history.push('/test')
     }
     return {
-      // errorCode: nextProps.errorCode,
       // ... other derived state properties
     }
   }
 
-  handleSubmit = (e) => {
-    e.preventDefault()
+  handleSubmit = (event) => {
+    event.preventDefault()
     this.props.userLogin({
       username: this.state.userName,
       password: this.state.password
     })
-
+    this.setState({
+      userName: '',
+      password: ''
+    })
   }
   render() {
     const token = window.localStorage.getItem('token')
@@ -44,7 +47,7 @@ class Login extends Component {
         <div className='login containerfluid'>
           <div>
             <div className='logo-login'>
-              <img src='https://mor.vn/wp-content/themes/mor-4.0/assets/images/logo-mor-coloring.svg' />
+              <img src={require('../images/logo-mor-coloring.svg')} />
             </div>
             <div className='form-validate'>
               <ValidationForm
@@ -94,6 +97,20 @@ class Login extends Component {
               </ValidationForm>
             </div>
           </div>
+          {
+            this.props.processing ? (
+              <div>
+                <ReactLoading
+                  type={'spin'}
+                  color={'#f8bf63'}
+                  height={'65px'}
+                  width={'65px'}
+                  className="loading"
+                />
+                <div className="loadingOverlay" />
+              </div>
+            ) : null
+          }
         </div>
       ) : (
           <Redirect to='/test' />

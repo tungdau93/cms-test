@@ -1,32 +1,21 @@
 import React, { Component } from 'react'
-import { Layout, Typography, Table, Button, Row, Col, Divider, Popconfirm, Icon } from "antd"
+import { Layout, Typography, Table, Button, Row, Col, Divider, Popconfirm, Icon, message } from "antd"
 import SearchInput, { createFilter } from 'react-search-input'
 import LayoutComponent from '../../layout/LayoutComponent'
 import { withRouter } from 'react-router'
 import QuestionTypes from '../../redux/question-redux'
 import { connect } from 'react-redux'
+import ReactLoading from 'react-loading'
 
 const { Title } = Typography
 const KEYS_TO_FILTERS = ['name', 'type', 'level']
-const data = []
+
 const type = ['ReactJS', 'PHP', 'Python', 'Golang', 'MySQL', 'HTML&CSS']
-for (let i = 1; i < 46; i++) {
-  data.push({
-    key: i,
-    name: `Question ${i}`,
-    type: type[Math.floor(Math.random() * type.length)],
-    level: Math.floor((Math.random() * 5) + 1),
-    image: 30,
-    createdAt: `${new Date().getDate()}/${new Date().getMonth()}/${new Date().getFullYear()}`,
-    modifiedAt: `${new Date().getDate()}/${new Date().getMonth()}/${new Date().getFullYear()}`
-  })
-}
 
 class ListQuestion extends Component {
   state = {
     selectedRowKeys: [], // Check here to configure the default column
     inputSearch: '',
-    token: ''
   }
 
   handleInputChange = (value) => {
@@ -40,21 +29,39 @@ class ListQuestion extends Component {
   }
 
   componentDidMount() {
-    const token = window.localStorage.getItem('token')
-    this.setState({
-      token: token
-    })
-    this.props.getData(this.state.token)
+    this.props.getData()
+  }
+
+  componentDidUpdate(nextProps) {
+    if (this.props.notifyMessage === 'Delete question successfully!') {
+      message.success(this.props.notifyMessage, 1)
+      nextProps.updateNotifyMessage()
+      nextProps.getData()
+    }
   }
 
   handleDeleteMulti = () => {
     this.props.deleteData({
-      id: this.state.selectedRowKeys,
-      token: this.state.token
+      set_id: this.state.selectedRowKeys,
     })
   }
 
   render() {
+
+    const data = []
+    for (let i = 0; i < this.props.listQuestion.length; i++) {
+      const createdAt = (this.props.listQuestion[i].create_date).split('-')
+      const date = createdAt[2].slice(0, 2) + '/' + createdAt[1] + '/' + createdAt[0]
+      data.push({
+        key: this.props.listQuestion[i].id,
+        name: this.props.listQuestion[i].content,
+        type: type[this.props.listQuestion[i].category - 1],
+        level: this.props.listQuestion[i].level,
+        createdAt: date,
+        creator: this.props.listQuestion[i].creator
+      })
+    }
+
     const columns = [
       {
         title: 'Name',
@@ -78,13 +85,6 @@ class ListQuestion extends Component {
         ellipsis: true
       },
       {
-        title: 'Image',
-        dataIndex: 'image',
-        key: 'image',
-        align: 'center',
-        ellipsis: true
-      },
-      {
         title: 'CreatedAt',
         dataIndex: 'createdAt',
         key: 'createdAt',
@@ -92,9 +92,9 @@ class ListQuestion extends Component {
         ellipsis: true
       },
       {
-        title: 'ModifiedAt',
-        dataIndex: 'modifiedAt',
-        key: 'modifiedAt',
+        title: 'Creator',
+        dataIndex: 'creator',
+        key: 'creator',
         align: 'center',
         ellipsis: true
       },
@@ -112,8 +112,10 @@ class ListQuestion extends Component {
               cancelText="No"
               onConfirm={() => {
                 this.props.deleteData({
-                  id: record.key,
-                  token: this.state.token
+                  set_id: [record.key],
+                })
+                this.setState({
+                  selectedRowKeys: []
                 })
               }}
             >
@@ -177,7 +179,24 @@ class ListQuestion extends Component {
               <Button type="primary" onClick={() => { this.props.history.push('/question/create') }}>Add</Button>
               {
                 selectedRowKeys.length > 0 ? (
-                  <Button type="danger" onClick={this.handleDeleteMulti}>Delete</Button>
+                  <Popconfirm
+                    title="Are you sure delete these questions?"
+                    okText="Yes"
+                    cancelText="No"
+                    onConfirm={
+                      () => {
+                        this.props.deleteData({
+                          set_id: this.state.selectedRowKeys
+                        })
+                        this.setState({
+                          selectedRowKeys: []
+                        })
+                      }
+                    }
+                  >
+                    <Button type="danger">Delete</Button>
+                  </Popconfirm>
+
                 ) : (
                     <Button type="danger" disabled>Delete</Button>
                   )
@@ -193,6 +212,20 @@ class ListQuestion extends Component {
             style={{ whiteSpace: 'unset' }}
           ></Table>
         </Layout>
+        {
+          this.props.processing ? (
+            <div>
+              <ReactLoading
+                type={'spin'}
+                color={'#f8bf63'}
+                height={'65px'}
+                width={'65px'}
+                className="loading"
+              />
+              <div className="loadingOverlay" />
+            </div>
+          ) : null
+        }
       </LayoutComponent>
     )
   }
@@ -201,17 +234,21 @@ class ListQuestion extends Component {
 const mapStateToProps = (state) => {
   return {
     listQuestion: state.questions.listQuestion,
-    processing: state.questions.processing
+    processing: state.questions.processing,
+    notifyMessage: state.questions.notifyMessage
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getData: (token) => {
-      dispatch(QuestionTypes.questionGetRequestt(token))
+    getData: () => {
+      dispatch(QuestionTypes.questionGetRequest())
     },
     deleteData: (content) => {
       dispatch(QuestionTypes.questionDeleteRequest(content))
+    },
+    updateNotifyMessage: () => {
+      dispatch(QuestionTypes.questionUpdateNotify())
     }
   }
 }

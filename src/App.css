@@ -4,7 +4,6 @@
 @import './pages/css/add-question.css';
 @import './pages/css/login.css';
 @import './pages/css/not-found.css';
-
 .App {
   text-align: center;
 }
@@ -44,7 +43,7 @@
   width: 100px;
   height: 100px;
   background: rgba(255, 255, 255, 0.2);
-  background-image: url('./pages/images/computer.png');
+  background-image: url('./pages/images/logo-mor-coloring.svg');
   background-repeat: no-repeat;
   background-size: cover;
   margin: 16px;

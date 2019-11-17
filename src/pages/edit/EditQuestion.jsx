@@ -1,49 +1,83 @@
 import React, { Component } from 'react'
 import ReactQuill from 'react-quill'
-import 'react-quill/dist/quill.snow.css'
-import '../css/add-question.css'
-import 'antd/dist/antd.css'
+// import 'react-quill/dist/quill.snow.css'
 import { connect } from 'react-redux'
 import QuestionTypes from '../../redux/question-redux'
 import LayoutComponent from '../../layout/LayoutComponent'
+import renderHTML from 'react-render-html'
 import { Form, Select, Button, Rate, Input, Radio, message, Upload, Icon, Typography, Row, Col, Layout } from 'antd'
+import ReactLoading from 'react-loading'
+
 const { Title } = Typography
 const { Option } = Select
 const { TextArea } = Input
 
-
 class EditQuestion extends Component {
   state = {
-    value: '',
-    file: undefined,    //image file
-    rating: 0,    //rating star
-    type: '',  //type of question
+    file: undefined,
     answer1: {
-      status: false,
+      is_true: false,
       content: ''
     },
     answer2: {
-      status: false,
+      is_true: false,
       content: ''
     },
     answer3: {
-      status: false,
+      is_true: false,
       content: ''
     },
     answer4: {
-      status: false,
+      is_true: false,
       content: ''
     },
     loading: false, //loading image
-    editorValue: '',
-    token: ''
+    note: '',
+    content: '',
+    category: 1,
+    level: 0,
+    correctAnswer: 0,
+    imageUrl: '',
+    image: '',
+    image_old: ''
   }
 
   componentDidMount() {
-    const token = window.localStorage.getItem('token')
-    this.setState({
-      token: token
-    })
+    const pathName = window.location.pathname.split('/')[window.location.pathname.split('/').length - 1]
+    this.props.getDetailData(pathName)
+  }
+
+  componentDidUpdate(nextProps) {
+    if (this.props.detailQuestion && nextProps.detailQuestion !== this.props.detailQuestion) {
+      this.props.detailQuestion.answers.map((item, index) => {
+        if (item.is_true == true) {
+          this.setState({
+            correctAnswer: index + 1
+          })
+        }
+      })
+      this.setState({
+        content: this.props.detailQuestion.content,
+        category: this.props.detailQuestion.category,
+        note: this.props.detailQuestion.note,
+        level: this.props.detailQuestion.level,
+        answer1: this.props.detailQuestion.answers[0],
+        answer2: this.props.detailQuestion.answers[1],
+        answer3: this.props.detailQuestion.answers[2],
+        answer4: this.props.detailQuestion.answers[3],
+        imageUrl: `http://27.72.88.246:8228${this.props.detailQuestion.image}`,
+        image_old: this.props.detailQuestion.image,
+        image: this.props.detailQuestion.image
+      })
+    }
+
+    if (this.props.notifyMessage === 'Edit question successfully!') {
+      message.success(this.props.notifyMessage, 1)
+      this.props.updateNotify()
+      setTimeout(() => {
+        this.props.history.push('/question')
+      }, 1000)
+    }
   }
 
   getBase64 = (img, callback) => {
@@ -62,6 +96,7 @@ class EditQuestion extends Component {
     }
     return (isJpgOrPng && isLt2M)
   }
+
   handleImageChange = info => {
     if (info.file.status === 'uploading') {
       this.setState({
@@ -72,18 +107,33 @@ class EditQuestion extends Component {
     if (info.file.status === 'done') {
       // Get this url from response in real world.
       this.getBase64(info.file.originFileObj, imageUrl => {
+        console.log(info.file)
         this.setState({
           file: info.file,
-          imageUrl,
+          image: info.file.response.data.url,
+          imageUrl: imageUrl,
           loading: false,
         })
       })
     }
   }
 
+  handleDeleteImageUrl = () => {
+    this.setState({
+      imageUrl: '',
+      image: ''
+    })
+  }
+
   handleEditorChange = (event) => {
     this.setState({
-      editorValue: event
+      note: event
+    })
+  }
+
+  handleTextAreaChange = (event) => {
+    this.setState({
+      content: event.target.value
     })
   }
 
@@ -93,37 +143,37 @@ class EditQuestion extends Component {
       case 1:
         this.setState({
           value: event.target.value,
-          answer1: { ...this.state.answer1, status: true },
-          answer2: { ...this.state.answer2, status: false },
-          answer3: { ...this.state.answer3, status: false },
-          answer4: { ...this.state.answer4, status: false }
+          answer1: { ...this.state.answer1, is_true: true },
+          answer2: { ...this.state.answer2, is_true: false },
+          answer3: { ...this.state.answer3, is_true: false },
+          answer4: { ...this.state.answer4, is_true: false }
         })
         break
       case 2:
         this.setState({
           value: event.target.value,
-          answer1: { ...this.state.answer1, status: false },
-          answer2: { ...this.state.answer2, status: true },
-          answer3: { ...this.state.answer3, status: false },
-          answer4: { ...this.state.answer4, status: false }
+          answer1: { ...this.state.answer1, is_true: false },
+          answer2: { ...this.state.answer2, is_true: true },
+          answer3: { ...this.state.answer3, is_true: false },
+          answer4: { ...this.state.answer4, is_true: false }
         })
         break
       case 3:
         this.setState({
           value: event.target.value,
-          answer1: { ...this.state.answer1, status: false },
-          answer2: { ...this.state.answer2, status: false },
-          answer3: { ...this.state.answer3, status: true },
-          answer4: { ...this.state.answer4, status: false }
+          answer1: { ...this.state.answer1, is_true: false },
+          answer2: { ...this.state.answer2, is_true: false },
+          answer3: { ...this.state.answer3, is_true: true },
+          answer4: { ...this.state.answer4, is_true: false }
         })
         break
       default:
         this.setState({
           value: event.target.value,
-          answer1: { ...this.state.answer1, status: false },
-          answer2: { ...this.state.answer2, status: false },
-          answer3: { ...this.state.answer3, status: false },
-          answer4: { ...this.state.answer4, status: true }
+          answer1: { ...this.state.answer1, is_true: false },
+          answer2: { ...this.state.answer2, is_true: false },
+          answer3: { ...this.state.answer3, is_true: false },
+          answer4: { ...this.state.answer4, is_true: true }
         })
         break
     }
@@ -134,45 +184,50 @@ class EditQuestion extends Component {
       [`answer${key}`]: { ...this.state['answer' + key], content: event.target.value },
     })
   }
+
   handleSubmit = (e) => {
     e.preventDefault()
     this.props.form.validateFields((err, values) => {
-      values.editorValue = this.state.editorValue
-      //image la url backend tra ve tu response
-      values.image = this.state.file
+      values.note = this.state.note
+      values.image = this.state.image
+      values.image_old = this.props.detailQuestion.image
       values.answers = [
         this.state.answer1,
         this.state.answer2,
         this.state.answer3,
         this.state.answer4
       ]
+      const questionData = {
+        answers: values.answers,
+        note: values.note,
+        image: values.image,
+        category: values.category,
+        level: values.level,
+        content: values.content,
+        image_old: values.image_old
+      }
       if (!err) {
-        console.log('Received values of form: ', values)
-        // message.success('Create question successfully!', 1)
         this.props.editData({
           id: window.location.pathname.split('/')[window.location.pathname.split('/').length - 1],
-          token: this.state.token,
-          data: values
+          data: questionData
         })
       }
     })
   }
-  render() {
 
+  render() {
     const { getFieldDecorator } = this.props.form
     const formItemLayout = {
       labelCol: { span: 6 },
       wrapperCol: { span: 18 },
     }
 
-    const { imageUrl } = this.state
     return (
       <LayoutComponent>
         <Layout>
           <Row className='header-wrapper'>
             <Title className='title-wrapper' level={3}>Create New Question</Title>
           </Row>
-
           <Row className='form-wrapper'>
             <Form {...formItemLayout} onSubmit={this.handleSubmit} className='addQuestion-horizontal'>
               <Row>
@@ -180,6 +235,7 @@ class EditQuestion extends Component {
                   <Form.Item {...formItemLayout} label="Content" >
                     {
                       getFieldDecorator('content', {
+                        initialValue: this.state.content,
                         rules: [
                           {
                             required: true, message: 'Please input question content!'
@@ -194,31 +250,42 @@ class EditQuestion extends Component {
                       }
                       )(
                         <TextArea
-                          placeholder="Controlled autosize"
+                          placeholder="Note"
                           rows={5}
                         />
                       )}
                   </Form.Item>
 
                   <Form.Item label="Type" hasFeedback>
-                    {getFieldDecorator('type', {
-                      rules: [{ required: true, message: 'Please select question type!' }],
-                    })(
-                      <Select placeholder="Please select a type"  >
-                        <Option value="1">ReactJS</Option>
-                        <Option value="2">PHP</Option>
-                        <Option value="3">Python</Option>
-                        <Option value="4">Golang</Option>
-                        <Option value="5">MySQL</Option>
-                        <Option value="6">HTML&CSS</Option>
-                      </Select>,
-                    )}
+                    {
+                      getFieldDecorator('category',
+                        {
+                          initialValue: this.state.category,
+                          rules: [{ required: true, message: 'Please select question type!' }],
+                        }
+                      )(
+                        <Select placeholder="Please select a type" onChange={this.handleTypeChange}>
+                          <Option value={1}>ReactJS</Option>
+                          <Option value={2}>PHP</Option>
+                          <Option value={3}>Python</Option>
+                          <Option value={4}>Golang</Option>
+                          <Option value={5}>MySQL</Option>
+                          <Option value={6}>HTML&CSS</Option>
+                        </Select>,
+                      )}
                   </Form.Item>
 
                   <Form.Item label="Rate">
-                    {getFieldDecorator('rate', {
-                      rules: [{ required: true, message: 'Please select level!' }],
-                    })(<Rate />)}
+                    {
+                      getFieldDecorator('level', {
+                        initialValue: this.state.level,
+                        rules: [{ required: true, message: 'Please select level!' }],
+                      }
+                      )(
+                        <Rate
+
+                        />
+                      )}
                   </Form.Item>
 
                   <Form.Item {...formItemLayout} label="Note" className='editor-container'>
@@ -226,66 +293,85 @@ class EditQuestion extends Component {
                       className='editor'
                       modules={EditQuestion.modules}
                       formats={EditQuestion.formats}
-                      value={this.state.editorValue}
+                      value={this.state.note}
                       placeholder="Note"
                       onChange={this.handleEditorChange}
+                      initialvalue={renderHTML(`${this.state.note}`)}
                     />
                   </Form.Item>
 
                 </Col>
                 <Col span={10}>
                   <Form.Item label='Answer' className='radio-wrapper'>
-                    {getFieldDecorator('value', {
-                      initialValue: this.state.value,
-                      rules: [
-                        { required: true, message: 'Please choose correct answer!' }
-                      ]
-                    })(
-                      <Radio.Group
-                        onChange={this.handleRadioChange}>
-                        <Radio className='radio-style' value={1} >
-                          <Form.Item >
-                            {getFieldDecorator('answer1', {
-                              rules: [
-                                { required: true, message: 'Please fill answer1' },
-                              ]
-                            }
-                            )(<Input onChange={(event) => {
-                              this.handleInputChange('1', event)
-                            }}
-                              value={this.state.answer1.content} />)}
-                          </Form.Item>
-                        </Radio>
-                        <Radio className='radio-style' value={2}>
-                          <Form.Item>
-                            {getFieldDecorator('answer2', { rules: [{ required: true, message: 'Please fill answer2' }] }
-                            )(<Input onChange={(event) => {
-                              this.handleInputChange('2', event)
-                            }}
-                              value={this.state.answer2.content} />)}
-                          </Form.Item>
-                        </Radio>
-                        <Radio className='radio-style' value={3} >
-                          <Form.Item>
-                            {getFieldDecorator('answer3', { rules: [{ required: true, message: 'Please fill answer3' }] }
-                            )(<Input onChange={(event) => {
-                              this.handleInputChange('3', event)
-                            }}
-                              value={this.state.answer3.content} />)}
-                          </Form.Item>
-                        </Radio>
-                        <Radio className='radio-style' value={4}>
-                          <Form.Item>
-                            {getFieldDecorator('answer4', { rules: [{ required: true, message: 'Please fill answer4' }] }
-                            )(<Input onChange={(event) => {
-                              this.handleInputChange('4', event)
-                            }}
-                              value={this.state.answer4.content} />)}
-                          </Form.Item>
-                        </Radio>
-                      </Radio.Group>)}
-                  </Form.Item>
+                    {
+                      getFieldDecorator('correctAnswer', {
+                        initialValue: this.state.correctAnswer,
+                        rules: [
+                          { required: true, message: 'Please choose correct answer!' }
+                        ]
+                      })(
+                        <Radio.Group
+                          onChange={this.handleRadioChange}>
+                          <Radio className='radio-style' value={1} >
+                            <Form.Item >
+                              {getFieldDecorator('answer1', {
+                                initialValue: this.state.answer1.content,
+                                rules: [
+                                  { required: true, message: 'Please fill answer1' },
+                                ]
+                              }
+                              )(
+                                <Input onChange={(event) => {
+                                  this.handleInputChange('1', event)
 
+                                }}
+                                />)}
+                            </Form.Item>
+                          </Radio>
+                          <Radio className='radio-style' value={2}>
+                            <Form.Item>
+                              {
+                                getFieldDecorator('answer2', {
+                                  initialValue: this.state.answer2.content,
+                                  rules: [{ required: true, message: 'Please fill answer2' }]
+                                }
+                                )(
+                                  <Input onChange={(event) => {
+                                    this.handleInputChange('2', event)
+                                  }}
+                                  />)}
+                            </Form.Item>
+                          </Radio>
+                          <Radio className='radio-style' value={3} >
+                            <Form.Item>
+                              {
+                                getFieldDecorator('answer3', {
+                                  initialValue: this.state.answer3.content,
+                                  rules: [{ required: true, message: 'Please fill answer3' }]
+                                }
+                                )(
+                                  <Input onChange={(event) => {
+                                    this.handleInputChange('3', event)
+                                  }}
+                                  />)}
+                            </Form.Item>
+                          </Radio>
+                          <Radio className='radio-style' value={4}>
+                            <Form.Item>
+                              {
+                                getFieldDecorator('answer4', {
+                                  initialValue: this.state.answer4.content,
+                                  rules: [{ required: true, message: 'Please fill answer4' }]
+                                }
+                                )(
+                                  <Input onChange={(event) => {
+                                    this.handleInputChange('4', event)
+                                  }}
+                                  />)}
+                            </Form.Item>
+                          </Radio>
+                        </Radio.Group>)}
+                  </Form.Item>
                   <Form.Item label='Image' className='uploadImage-wrapper'>
                     {
                       getFieldDecorator('image', {
@@ -297,11 +383,14 @@ class EditQuestion extends Component {
                             listType="picture"
                             className="avatar-uploader"
                             showUploadList={false}
-                            action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                            action="http://27.72.88.246:8228/api/upload/"
+                            headers={
+                              { "Authorization": `Bearer ${window.localStorage.getItem('token')}` }
+                            }
                             beforeUpload={this.beforeUpload}
                             onChange={this.handleImageChange}>
                             {
-                              imageUrl ? <img src={imageUrl} alt="image" style={{ width: '150px', height: '150px' }} /> : (
+                              this.state.imageUrl ? <img src={this.state.imageUrl} alt="image" style={{ width: '150px', height: '150px' }} /> : (
                                 <div className='show-upload-imageUrl'>
                                   <Icon type={this.state.loading ? 'loading' : 'plus'} />
                                   <div className="ant-upload-text">Upload</div>
@@ -310,7 +399,7 @@ class EditQuestion extends Component {
                             }
                           </Upload>
                           {
-                            imageUrl ? (
+                            this.state.imageUrl ? (
                               <Icon
                                 type="close-circle"
                                 theme='twoTone'
@@ -318,13 +407,7 @@ class EditQuestion extends Component {
                                 style={{
                                   fontSize: '26px'
                                 }}
-                                onClick={
-                                  () => {
-                                    this.setState({
-                                      imageUrl: ''
-                                    })
-                                  }
-                                }
+                                onClick={this.handleDeleteImageUrl}
                               />
                             ) : null
                           }
@@ -341,6 +424,20 @@ class EditQuestion extends Component {
             </Form>
           </Row>
         </Layout>
+        {
+          this.props.processing ? (
+            <div>
+              <ReactLoading
+                type={'spin'}
+                color={'#f8bf63'}
+                height={'65px'}
+                width={'65px'}
+                className="loading"
+              />
+              <div className="loadingOverlay" />
+            </div>
+          ) : null
+        }
       </LayoutComponent>
     )
   }
@@ -366,15 +463,24 @@ EditQuestion.formats = [
 
 const mapStateToProps = (state) => {
   return {
-    proccessing: state.questions.proccessing,
+    detailQuestion: state.questions.detailQuestion,
+    processing: state.questions.processing,
     notifyMessage: state.questions.notifyMessage
   }
 }
 
 const mapDispatchToProps = (dispatch) => {
   return {
+    getDetailData: (id) => {
+      dispatch(QuestionTypes.questionGetDetail(id))
+    },
+
     editData: (content) => {
       dispatch(QuestionTypes.questionEditRequest(content))
+    },
+
+    updateNotify: () => {
+      dispatch(QuestionTypes.questionUpdateNotify())
     }
   }
 }
